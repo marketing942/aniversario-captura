@@ -1,19 +1,18 @@
 /* =========================================================
    Colégio CPPEM — 1ª Edição · Aniversário do Colégio
-   Formulário de inscrição → Google Sheets (Apps Script)
+   Formulário de inscrição → Google Sheets
    + campo condicional de indicação
-   + redirect automático para o WhatsApp
+   + redirect imediato para o WhatsApp na mesma aba
    ========================================================= */
 
-/* ⚠️ CONFIGURE ANTES DE PUBLICAR ------------------------------------------
-   1) SHEET_URL   → URL do Web App do Google Apps Script (termina em /exec)
-   2) WHATSAPP_NUM → número de atendimento, só dígitos, com DDI 55
--------------------------------------------------------------------------- */
+/* ---------- CONFIGURAÇÕES ---------- */
+
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbxEp3dzDtCk7t3BslRj_EqGgP9elQbdcWTyJG2Iq2I7_AxUBd7JlRV9d2k8PRRmZ6gC/exec";
-const WHATSAPP_GROUP = "https://chat.whatsapp.com/Huxe6eDXGCc2HZxqy2GxlW?mode=gi_t"; // grupo do evento
-const REDIRECT_SEG   = 3; // segundos antes de abrir o grupo
+
+const WHATSAPP_GROUP = "https://chat.whatsapp.com/Huxe6eDXGCc2HZxqy2GxlW?mode=gi_t";
 
 /* ---------- Campo condicional de indicação ---------- */
+
 const form = document.getElementById("lead-form");
 const selIndicado = document.getElementById("indicado");
 const fieldIndicador = document.getElementById("field-indicador");
@@ -21,30 +20,40 @@ const inputIndicador = document.getElementById("indicador");
 
 function toggleIndicador() {
   const isSim = selIndicado.value === "Sim";
+
   fieldIndicador.classList.toggle("show", isSim);
+
   if (!isSim) {
     inputIndicador.value = "";
     clearError("indicador");
   }
 }
-if (selIndicado) selIndicado.addEventListener("change", toggleIndicador);
+
+if (selIndicado) {
+  selIndicado.addEventListener("change", toggleIndicador);
+}
 
 /* ---------- Validação ---------- */
+
 function fieldOf(name) {
   return form.querySelector(`[name="${name}"]`).closest(".field");
 }
+
 function setError(name, msg) {
   fieldOf(name).classList.add("invalid");
   form.querySelector(`[data-error-for="${name}"]`).textContent = msg;
 }
+
 function clearError(name) {
   fieldOf(name).classList.remove("invalid");
   form.querySelector(`[data-error-for="${name}"]`).textContent = "";
 }
+
 const isEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 
 function validate() {
   let ok = true;
+
   ["nome", "email", "telefone", "indicado", "indicador"].forEach(clearError);
 
   const nome = form.nome.value.trim();
@@ -53,10 +62,26 @@ function validate() {
   const indicado = form.indicado.value;
   const indicador = form.indicador.value.trim();
 
-  if (nome.length < 3) { setError("nome", "Informe seu nome completo."); ok = false; }
-  if (!isEmail(email)) { setError("email", "Informe um e-mail válido."); ok = false; }
-  if (tel.length < 10) { setError("telefone", "Informe um telefone válido com DDD."); ok = false; }
-  if (!indicado) { setError("indicado", "Selecione uma opção."); ok = false; }
+  if (nome.length < 3) {
+    setError("nome", "Informe seu nome completo.");
+    ok = false;
+  }
+
+  if (!isEmail(email)) {
+    setError("email", "Informe um e-mail válido.");
+    ok = false;
+  }
+
+  if (tel.length < 10) {
+    setError("telefone", "Informe um telefone válido com DDD.");
+    ok = false;
+  }
+
+  if (!indicado) {
+    setError("indicado", "Selecione uma opção.");
+    ok = false;
+  }
+
   if (indicado === "Sim" && indicador.length < 3) {
     setError("indicador", "Informe o nome completo de quem indicou.");
     ok = false;
@@ -65,19 +90,40 @@ function validate() {
   return ok;
 }
 
+/* ---------- Máscara de telefone ---------- */
+
+const telefoneInput = document.getElementById("telefone");
+
+if (telefoneInput) {
+  telefoneInput.addEventListener("input", () => {
+    const v = telefoneInput.value.replace(/\D/g, "").slice(0, 11);
+    let out = "";
+
+    if (v.length > 0) out = "(" + v.slice(0, 2);
+    if (v.length >= 2) out += ") ";
+    if (v.length > 2) out += v.slice(2, 7);
+    if (v.length > 7) out += "-" + v.slice(7, 11);
+
+    telefoneInput.value = out;
+  });
+}
+
 /* ---------- Envio ---------- */
+
 if (form) {
   const btn = document.getElementById("lead-submit");
   const success = document.getElementById("form-success");
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
+
     if (!validate()) return;
 
     btn.disabled = true;
     btn.textContent = "ENVIANDO...";
 
     const indicado = form.indicado.value;
+
     const payload = {
       nome: form.nome.value.trim(),
       email: form.email.value.trim(),
@@ -89,13 +135,19 @@ if (form) {
     try {
       await fetch(SHEET_URL, {
         method: "POST",
-        mode: "no-cors", // Apps Script não envia cabeçalhos CORS; resposta é opaca
-        headers: { "Content-Type": "application/json" },
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8",
+        },
         body: JSON.stringify(payload),
       });
 
-      // Evento de Lead do Pixel X
-      if (window.pixel_x_app && typeof window.pixel_x_app.send_event === "function") {
+      /* ---------- Evento de Lead do Pixel X ---------- */
+
+      if (
+        window.pixel_x_app &&
+        typeof window.pixel_x_app.send_event === "function"
+      ) {
         try {
           await window.pixel_x_app.send_event({
             event_name: "Lead",
@@ -104,30 +156,43 @@ if (form) {
             lead_phone: payload.telefone,
           });
         } catch (_) {
-          /* não bloqueia o fluxo de sucesso/redirect */
+          /*
+            Não bloqueia o fluxo.
+            Mesmo que o Pixel X falhe, o lead já foi enviado para a planilha.
+          */
         }
       }
 
-      // Estado de sucesso: oculta o formulário e mostra a confirmação
-      form.querySelectorAll(".field, .note").forEach((el) => (el.style.display = "none"));
-      btn.style.display = "none";
-      success.hidden = false;
-      success.scrollIntoView({ behavior: "smooth", block: "center" });
+      /* ---------- Sucesso + redirect imediato ---------- */
 
-      // Contagem regressiva → redireciona para o WhatsApp (mesma aba = sem bloqueio de popup)
-      const countEl = document.getElementById("countdown");
-      let seg = REDIRECT_SEG;
-      if (countEl) countEl.textContent = seg;
-      const timer = setInterval(() => {
-        seg--;
-        if (countEl) countEl.textContent = Math.max(seg, 0);
-        if (seg <= 0) {
-          clearInterval(timer);
-          window.location.href = WHATSAPP_GROUP;
-        }
-      }, 1000);
+      form.querySelectorAll(".field, .note, .progress").forEach((el) => {
+        el.style.display = "none";
+      });
+
+      btn.style.display = "none";
+
+      if (success) {
+        success.hidden = false;
+        success.innerHTML = `
+          ✅ Inscrição confirmada!<br>
+          Você será redirecionado agora para o grupo do WhatsApp.
+        `;
+        success.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }
+
+      /*
+        Redireciona na mesma aba.
+        Não abre nova janela.
+        Não tem contagem de 3 segundos.
+      */
+      window.location.href = WHATSAPP_GROUP;
+
     } catch (err) {
       setError("telefone", "Erro ao enviar. Tente novamente.");
+
       btn.disabled = false;
       btn.textContent = "QUERO CONFIRMAR MINHA PRESENÇA";
     }
