@@ -1,0 +1,80 @@
+/* CPPEM — Landing page única | headline > form > botão > provas sociais */
+
+:root{
+  --black:#0A0A0A; --green:#00E63C; --white:#F5F5F5;
+  --mil:#1A3D2B; --gold:#C9A84C;
+  --panel:rgba(19,22,19,.78); --line:#2A2F2A; --muted:#A9B0A9;
+  --shadow:0 10px 30px rgba(0,230,60,.22);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--black);color:var(--white);font-family:"Montserrat",system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh}
+img{display:block;max-width:100%}
+
+/* fundo mesclado fixo */
+.bg{position:fixed;inset:0;z-index:-2;background:url("public/bg-collage.jpg") center/cover no-repeat;filter:grayscale(.25)}
+.bg-scrim{position:fixed;inset:0;z-index:-1;
+  background:
+    radial-gradient(120% 70% at 50% 0%,rgba(0,230,60,.10),transparent 55%),
+    linear-gradient(180deg,rgba(10,10,10,.82),rgba(10,10,10,.9) 60%,rgba(10,10,10,.96))}
+
+/* container central estreito */
+.page{max-width:600px;margin:0 auto;padding:2.5rem 1.3rem 4rem;text-align:center;display:flex;flex-direction:column;align-items:center}
+
+.logo{height:64px;width:auto;margin-bottom:2rem}
+
+/* 1. headline */
+.headline{font-family:"Bebas Neue",sans-serif;font-weight:400;text-transform:uppercase;
+  font-size:clamp(2.4rem,8vw,3.8rem);line-height:.98;letter-spacing:.01em;margin-bottom:1rem}
+.headline .hl{color:var(--green)}
+.sub{color:var(--muted);font-size:1.02rem;max-width:32rem;margin-bottom:2rem}
+
+/* 2+3. form + botão */
+.form{width:100%;max-width:420px;background:var(--panel);backdrop-filter:blur(6px);
+  border:1px solid var(--line);border-top:3px solid var(--green);border-radius:14px;
+  padding:1.6rem 1.4rem;box-shadow:0 24px 60px rgba(0,0,0,.55);text-align:left}
+.field{margin-bottom:.85rem}
+.field input{width:100%;background:#0E110E;border:1px solid var(--line);border-radius:9px;
+  color:var(--white);font-family:inherit;font-size:1rem;padding:.9rem;transition:border-color .15s,box-shadow .15s}
+.field input::placeholder{color:#5d655d}
+.field input:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px rgba(0,230,60,.18)}
+.field input.is-invalid{border-color:#ff5b5b;box-shadow:0 0 0 3px rgba(255,91,91,.15)}
+.error{display:block;color:#ff7a7a;font-size:.76rem;margin-top:.3rem;min-height:1em}
+
+.cta{width:100%;font-family:"Montserrat",sans-serif;font-weight:800;letter-spacing:.04em;text-transform:uppercase;
+  cursor:pointer;border:none;border-radius:10px;padding:1.05rem 1.5rem;font-size:.95rem;
+  color:var(--black);background:var(--green);box-shadow:var(--shadow);
+  transition:transform .15s,box-shadow .2s,background .2s;margin-top:.4rem}
+.cta:hover{transform:translateY(-2px);box-shadow:0 14px 38px rgba(0,230,60,.38);background:#16ff52}
+.cta:active{transform:translateY(0)}
+.cta:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.note{text-align:center;font-size:.76rem;color:var(--muted);margin-top:.8rem}
+.success{margin-top:1rem;padding:.85rem;background:rgba(0,230,60,.12);border:1px solid var(--green);
+  border-radius:9px;color:var(--green);font-weight:600;font-size:.88rem;text-align:center}
+
+/* 4. provas sociais */
+.social{width:100%;margin-top:3rem}
+.social__eyebrow{display:block;font-family:"Bebas Neue",sans-serif;font-size:1.6rem;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:1.3rem}
+/* carrossel infinito de fotos dos alunos */
+.carousel{position:relative;width:100%;overflow:hidden;
+  /* esmaece as bordas para o loop entrar/sair suavemente */
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);
+          mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent)}
+.carousel__track{display:flex;gap:1rem;width:max-content;margin:0;padding:0;list-style:none;
+  will-change:transform;animation:carousel-scroll 45s linear infinite}
+.carousel:hover .carousel__track,
+.carousel:focus-within .carousel__track{animation-play-state:paused}
+.carousel__item{flex:0 0 auto;width:clamp(150px,42vw,190px);aspect-ratio:4/5;
+  background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;
+  box-shadow:0 18px 40px rgba(0,0,0,.45)}
+.carousel__item img{width:100%;height:100%;object-fit:cover}
+/* desloca exatamente metade da pista + meia-fenda (½ do gap de 1rem) p/ loop perfeito */
+@keyframes carousel-scroll{from{transform:translate3d(0,0,0)}to{transform:translate3d(calc(-50% - .5rem),0,0)}}
+
+@media (prefers-reduced-motion:reduce){
+  *{scroll-behavior:auto!important;transition:none!important}
+  /* sem animação: vira uma faixa rolável manualmente */
+  .carousel{overflow-x:auto;-webkit-mask-image:none;mask-image:none}
+  .carousel__track{animation:none}
+}
