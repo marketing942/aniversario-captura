@@ -9,7 +9,7 @@
    1) SHEET_URL   → URL do Web App do Google Apps Script (termina em /exec)
    2) WHATSAPP_NUM → número de atendimento, só dígitos, com DDI 55
 -------------------------------------------------------------------------- */
-const SHEET_URL      = "https://script.google.com/macros/s/AKfycbxdFplWVSfhTjvyIA7HIWb645xRjGNhBVhTdTf5UMjo0lSpW_A_jCuys0qB4uImKXPQ/exec";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbxEp3dzDtCk7t3BslRj_EqGgP9elQbdcWTyJG2Iq2I7_AxUBd7JlRV9d2k8PRRmZ6gC/exec";
 const WHATSAPP_GROUP = "https://chat.whatsapp.com/Huxe6eDXGCc2HZxqy2GxlW?mode=gi_t"; // grupo do evento
 const REDIRECT_SEG   = 3; // segundos antes de abrir o grupo
 
