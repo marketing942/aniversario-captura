@@ -142,26 +142,15 @@ if (form) {
         body: JSON.stringify(payload),
       });
 
-      /* ---------- Evento de Lead do Pixel X ---------- */
+      /* ---------- Evento de Lead (GTM / dataLayer) ---------- */
 
-      if (
-        window.pixel_x_app &&
-        typeof window.pixel_x_app.send_event === "function"
-      ) {
-        try {
-          await window.pixel_x_app.send_event({
-            event_name: "Lead",
-            lead_name: payload.nome,
-            lead_email: payload.email,
-            lead_phone: payload.telefone,
-          });
-        } catch (_) {
-          /*
-            Não bloqueia o fluxo.
-            Mesmo que o Pixel X falhe, o lead já foi enviado para a planilha.
-          */
-        }
-      }
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: "Lead",
+        lead_name: payload.nome,
+        lead_email: payload.email,
+        lead_phone: payload.telefone,
+      });
 
       /* ---------- Sucesso + redirect imediato ---------- */
 
